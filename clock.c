@@ -1,7 +1,7 @@
 /* clock.c -- controller part of the clock project
  *
  * Darren Provine, 17 July 2009
- *
+ * Jason Bempong 
  * Copyright (C) Darren Provine, 2009-2022, All Rights Reserved
  */
 
@@ -51,7 +51,7 @@ void process_key(keybits KeyCode)
     void stop_clock(void);
     int KeyRow, KeyCol;
     int view_props;
-    time_t now;
+    time_t now = time(NULL);
 
     if (DebugLevel >= 3) {
         printf("keybits: %x\r\n", KeyCode);
@@ -62,7 +62,8 @@ void process_key(keybits KeyCode)
         // TODO: figure out KeyRow and KeyCol
         //       right now KeyRow and KeyCol are hardcoded to
         //       24-hour mode
-        KeyRow = 0; KeyCol = 0;
+        KeyRow = KeyCode & 0x0f;
+	KeyCol = KeyCode >> 4;
 
         if (DebugLevel >= 3) {
             printf("row: %d, col: %d\r\n", KeyRow, KeyCol);
@@ -82,8 +83,16 @@ void process_key(keybits KeyCode)
                     set_view_properties (view_props);
                     break;
                 case 2:
+		    view_props = get_view_properties();
+                    view_props |= ( DATE_MODE );
+                    set_view_properties (view_props);
+		    date_mode_end = now + 5;
                     break;
                 case 3:
+		    view_props = get_view_properties();
+                    view_props |= ( TEST_MODE );
+                    set_view_properties (view_props);
+                    test_mode_end = now + 3;
                     break;
                 case 4:
                     stop_clock();
@@ -98,7 +107,7 @@ void process_key(keybits KeyCode)
     } else { // keystroke
         // TODO: figure out ASCII value from first 8 bits
         //       right now any key goes to 24-hour mode
-        KeyCode = '2';
+	    KeyCode >>= 8;
         switch( KeyCode ) {
             case '2':
                 view_props = get_view_properties();
@@ -172,7 +181,7 @@ int main(int argc, char *argv[])
     // set view properties; default is "24 hour text mode"
     view_props = 0;  // all bits off
     if ( ampm )
-        view_props = AMPM_MODE;
+        view_props |= AMPM_MODE;
     if ( date )
         view_props |= DATE_MODE;  // note |= to switch on a bit
     if ( LED )
@@ -188,9 +197,7 @@ int main(int argc, char *argv[])
     if (LED) { // set up the fancy display
         start_display();
         // has to be exactly 78 chars
-        set_title_bar("----------------------------"
-                      "   YOUR NAME HERE    "
-                      "----------------------------");
+        set_title_bar(	"                                  JASON BEMPONG                                  "   );
         register_keyhandler(process_key);
 
         // turn on some keys in row 2,
@@ -229,9 +236,16 @@ void new_time(struct tm *dateinfo)
     // handle date mode
     if ( now > date_mode_end ) {
         // put in code to turn off DATE bit
+	view_props = get_view_properties();
+	view_props &= ( ~ DATE_MODE );
+	set_view_properties (view_props);
+
     }
     if ( now > test_mode_end ) {
         // put in code to turn off TEST bit
+	view_props = get_view_properties();
+        view_props &= ( ~ TEST_MODE );
+        set_view_properties (view_props);
     }    
 
     if (DebugLevel >= 3) {

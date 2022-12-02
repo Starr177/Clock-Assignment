@@ -1,14 +1,21 @@
 /* view.c -- view module for clock project (the V in MVC)
  *
  * Darren Provine, 17 July 2009
- *
+ * Jason Bempong 
+ * Nov 27th, 2022
  * Copyright (C) Darren Provine, 2009-2022, All Rights Reserved
  */
 
 #include "clock.h"
 #include "view.h"
+#define  AMPM_MODE  0x01
+#define  DATE_MODE  0x02
+#define  LED_MODE   0x04
+#define  TEST_MODE  0x10
+
 
 /* see "view.h" for list of bits that set properties */
+
 
 int view_props = 0x00; // default is 24-hour mode, plain text
 
@@ -55,7 +62,7 @@ char * make_timestring (struct tm *dateinfo, int dividers)
            timeformat = "%-m/%d/%Y dt";
              
           } else {
-	   timeformat = "%-m%d%Yd";
+	   timeformat = "%-m%d%y dt";
 
       } }else  { 
 
@@ -113,16 +120,16 @@ void show_led(struct tm *dateinfo)
     for (i = 0; i < 6; i++) {
         switch ( make_timestring(dateinfo, 0)[i] ) {
             case ' ': bitvalues = 0x00; break;
-            case '1': bitvalues = 0x01; break;
-            case '2': bitvalues = 0x02; break;
-            case '3': bitvalues = 0x03; break;
-            case '4': bitvalues = 0x04; break;
-            case '5': bitvalues = 0x05; break;
-            case '6': bitvalues = 0x06; break;
+            case '1': bitvalues = 0x03; break;
+            case '2': bitvalues = 0x76; break;
+            case '3': bitvalues = 0x57; break;
+            case '4': bitvalues = 0x1B; break;
+            case '5': bitvalues = 0x5D; break;
+            case '6': bitvalues = 0x7D; break;
             case '7': bitvalues = 0x07; break;
-            case '8': bitvalues = 0x08; break;
-            case '9': bitvalues = 0x09; break;
-            case '0': bitvalues = 0x0a; break;
+            case '8': bitvalues = 0x7F; break;
+            case '9': bitvalues = 0x1F; break;
+            case '0': bitvalues = 0x6F; break;
         }
         where[i] = bitvalues;
     }
